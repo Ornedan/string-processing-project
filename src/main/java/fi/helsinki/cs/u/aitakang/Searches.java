@@ -84,19 +84,4 @@ public class Searches {
 		
 		return new Range(lo, hi);
 	}
-	
-	protected static final class Range {
-		public final int begin; // Inclusive
-		public final int end;   // Exclusive
-		
-		public Range(int begin, int end) {
-			this.begin = begin;
-			this.end = end;
-		}
-
-		@Override
-		public String toString() {
-			return "Range [begin=" + begin + ", end=" + end + "]";
-		}
-	}
 }

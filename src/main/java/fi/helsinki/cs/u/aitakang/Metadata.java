@@ -1,18 +1,18 @@
 package fi.helsinki.cs.u.aitakang;
 
-public class Metadata <T> {
-	// Index of the first character the metadata is attached to, inclusive
-	public final int begin;
-	
-	// Index of the last character the metadata is attached to, exclusive
-	public final int end;
-	
-	// The data element itself
+public class Metadata <T> extends Range {
+	// The data element
 	public final T meta;
 
 	public Metadata(int begin, int end, T meta) {
-		this.begin = begin;
-		this.end = end;
+		super(begin, end);
+
 		this.meta = meta;
+	}
+
+	@Override
+	public String toString() {
+		return "Metadata [meta=" + meta + ", begin=" + begin + ", end=" + end
+				+ "]";
 	}
 }

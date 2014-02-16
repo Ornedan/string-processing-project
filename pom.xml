@@ -4,4 +4,6 @@
   <artifactId>string-processing-project</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>String Processing Algorithms Project</name>
+  <dependencies>
+  </dependencies>
 </project>
