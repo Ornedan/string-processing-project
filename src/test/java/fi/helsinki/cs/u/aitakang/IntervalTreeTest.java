@@ -1,3 +1,4 @@
+package fi.helsinki.cs.u.aitakang;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
