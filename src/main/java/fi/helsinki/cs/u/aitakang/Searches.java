@@ -154,24 +154,24 @@ public class Searches {
 				hihi = mid - 1;
 		}
 		
-		// There are character matches at this position
+		// Match
 		if(lolo <= lohi && hilo <= hihi) {
 			inexactBinarySearch(text, sa, pattern, limit, results,
 					pos + 1, diff, length + 1, newLo, newHi, spec + "M");
 		}
-		//else {
-			// Replacement
+		// Replacement
+		else {
 			inexactBinarySearch(text, sa, pattern, limit, results,
 					pos + 1, diff + 1, length + 1, lo, hi, spec + "R");
+		}
+		
+		// Deletion
+		inexactBinarySearch(text, sa, pattern, limit, results,
+				pos + 1, diff + 1, length, lo, hi, spec + "D");
 
-			// Deletion
-			inexactBinarySearch(text, sa, pattern, limit, results,
-					pos + 1, diff + 1, length, lo, hi, spec + "D");
-
-			// Insertion
-			inexactBinarySearch(text, sa, pattern, limit, results,
-					pos, diff + 1, length + 1, lo, hi, spec + "I");
-		//}
+		// Insertion
+		inexactBinarySearch(text, sa, pattern, limit, results,
+				pos, diff + 1, length + 1, lo, hi, spec + "I");
 	}
 	
 	public static void showMatch(String text, int[] sa, Match match) {
