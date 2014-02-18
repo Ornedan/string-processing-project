@@ -99,7 +99,7 @@ public class Searches {
 		return results;
 	}
 	
-	public static void inexactBinarySearch(String text, int[] sa,
+	private static void inexactBinarySearch(String text, int[] sa,
 			BackwardsSearchData bsd, String pattern, int limit,
 			List<InexactMatch> results, int pos, int diff, int length, int lo,
 			int hi, String spec) {

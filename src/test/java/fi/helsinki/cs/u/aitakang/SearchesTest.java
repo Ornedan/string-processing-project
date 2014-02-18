@@ -5,8 +5,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +86,6 @@ public class SearchesTest {
 		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 2, "bananana").isEmpty(), is(false));
 		
 		// 'bn' with 1 error generates matches 'ban', 'an', 'ba', 'b', 'n'
-		showMatches(Searches.inexactBinarySearch(text, sa, bsd, 1, "bn"));
 		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 1, "bn").size(), is(5));
 	}
 	
@@ -107,21 +104,6 @@ public class SearchesTest {
 		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 2, "bananana").isEmpty(), is(false));
 		
 		// 'bn' with 1 error generates matches 'ban', 'an', 'ba', 'b', 'n'
-		//showMatches(Searches.inexactBackwardsSearch(text, sa, bsd, 1, "bn"));
-		
 		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 1, "bn").size(), is(5));
-	}
-	
-	
-	private void showMatches(List<? extends Match> matches) {
-		for(Match match: matches)
-			showMatch(text, sa, match);
-	}
-
-	private static void showMatch(String text, int[] sa, Match match) {
-		System.out.println(match);
-		for(int i = match.begin; i < match.end; i++) {
-			System.out.println(text.substring(sa[i], Math.min(sa[i] + match.length, text.length())));
-		}
 	}
 }
