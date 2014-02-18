@@ -7,28 +7,31 @@ public class BackwardsSearchData {
 
 	public static final int BLOCK_SIZE = 1024;
 
-	// Count of lesser characters in the string
+	/** The set of characters used in the text. */
+	public final TreeSet<Character> alphabet;
+	
+	/** Counts of lesser characters in the text. */
 	public final int[] counts;
 	
-	// Burrows-Wheeler Transform of the text
+	/** Burrows-Wheeler Transform of the text. */
 	protected final char[] bwt;
 	
-	// Character-count-in-BWT lookup blocks
+	/** Character-count-in-BWT lookup blocks. */
 	protected final int[][] blocks;
 	
 	
 	public BackwardsSearchData(String text, int[] sa) {
-		TreeSet<Character> alphabet = new TreeSet<Character>();
+		this.alphabet = new TreeSet<Character>();
 		for(char c: text.toCharArray())
-			alphabet.add(c);
+			this.alphabet.add(c);
 		
-		this.counts = lesserThanCounts(text, sa, alphabet);
+		this.counts = lesserThanCounts(text, sa, this.alphabet);
 		this.bwt = burrowsWheelerTransform(text, sa);
 		
 		// Calculate lookup blocks
 		this.blocks = new int[sa.length / BLOCK_SIZE + (sa.length % BLOCK_SIZE == 0 ? 0 : 1)][];
 		
-		int[] running = new int[alphabet.last() + 1];
+		int[] running = new int[this.alphabet.last() + 1];
 		for(int i = 0; i < bwt.length; i++) {
 			if(i % BLOCK_SIZE == 0)
 				this.blocks[i / BLOCK_SIZE] = Arrays.copyOf(running, running.length);
@@ -61,7 +64,8 @@ public class BackwardsSearchData {
 		return bwt;
 	}
 	
-	public static int[] lesserThanCounts(String text, int[] sa, TreeSet<Character> alphabet) {
+	public static int[] lesserThanCounts(String text, int[] sa,
+			TreeSet<Character> alphabet) {
 		int[] counts = new int[alphabet.last() + 1];
 		for(int i = 0, n = 0; n < counts.length; n++) {
 			char c = (char)n;

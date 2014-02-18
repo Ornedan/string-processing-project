@@ -1,7 +1,11 @@
 package fi.helsinki.cs.u.aitakang;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -72,18 +76,52 @@ public class SearchesTest {
 	@Test
 	public void testInexactBinarySearch() {
 		// Behaves like exact search when error limit is 0
-		assertThat(Searches.inexactBinarySearch(text, sa, 0, "banana").size(), is(1));
-		assertThat(Searches.inexactBinarySearch(text, sa, 0, "bn").isEmpty(), is(true));
-		assertThat(Searches.inexactBinarySearch(text, sa, 0, "foo").isEmpty(), is(true));
-		assertThat(Searches.inexactBinarySearch(text, sa, 0, "frobnozzle").isEmpty(), is(true));
-		assertThat(Searches.inexactBinarySearch(text, sa, 0, "bananana").isEmpty(), is(true));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 0, "banana").size(), is(1));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 0, "bn").isEmpty(), is(true));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 0, "foo").isEmpty(), is(true));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 0, "frobnozzle").isEmpty(), is(true));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 0, "bananana").isEmpty(), is(true));
 		
 		
 		// bananana matches if we allow at least 2 characters error
-		assertThat(Searches.inexactBinarySearch(text, sa, 1, "bananana").isEmpty(), is(true));
-		assertThat(Searches.inexactBinarySearch(text, sa, 2, "bananana").isEmpty(), is(false));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 1, "bananana").isEmpty(), is(true));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 2, "bananana").isEmpty(), is(false));
 		
-		// 'bn' with 1 error generates matches 'ba', 'b', 'ban', 'n'
-		assertThat(Searches.inexactBinarySearch(text, sa, 1, "bn").size(), is(4));
+		// 'bn' with 1 error generates matches 'ban', 'an', 'ba', 'b', 'n'
+		showMatches(Searches.inexactBinarySearch(text, sa, bsd, 1, "bn"));
+		assertThat(Searches.inexactBinarySearch(text, sa, bsd, 1, "bn").size(), is(5));
+	}
+	
+	@Test
+	public void testInexactBackwardsSearch() {
+		// Behaves like exact search when error limit is 0
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 0, "banana").size(), is(1));
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 0, "bn").isEmpty(), is(true));
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 0, "foo").isEmpty(), is(true));
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 0, "frobnozzle").isEmpty(), is(true));
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 0, "bananana").isEmpty(), is(true));
+		
+		
+		// bananana matches if we allow at least 2 characters error
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 1, "bananana").isEmpty(), is(true));
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 2, "bananana").isEmpty(), is(false));
+		
+		// 'bn' with 1 error generates matches 'ban', 'an', 'ba', 'b', 'n'
+		//showMatches(Searches.inexactBackwardsSearch(text, sa, bsd, 1, "bn"));
+		
+		assertThat(Searches.inexactBackwardsSearch(text, sa, bsd, 1, "bn").size(), is(5));
+	}
+	
+	
+	private void showMatches(List<? extends Match> matches) {
+		for(Match match: matches)
+			showMatch(text, sa, match);
+	}
+
+	private static void showMatch(String text, int[] sa, Match match) {
+		System.out.println(match);
+		for(int i = match.begin; i < match.end; i++) {
+			System.out.println(text.substring(sa[i], Math.min(sa[i] + match.length, text.length())));
+		}
 	}
 }
