@@ -47,7 +47,7 @@ public class Main {
 		
 		// Load the queries
 		Type queryListType =
-				new TypeToken<List<Metadata<Integer>>>() {}.getType();
+				new TypeToken<List<QuerySpec>>() {}.getType();
 		List<QuerySpec> queries = new Gson().fromJson(new FileReader(
 				pathToQueries), queryListType);
 		

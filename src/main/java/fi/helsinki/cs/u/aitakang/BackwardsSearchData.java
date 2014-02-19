@@ -28,8 +28,10 @@ public class BackwardsSearchData {
 		this.counts = lesserThanCounts(text, sa, this.alphabet);
 		this.bwt = burrowsWheelerTransform(text, sa);
 		
-		// Calculate lookup blocks
-		this.blocks = new int[sa.length / BLOCK_SIZE + (sa.length % BLOCK_SIZE == 0 ? 0 : 1)][];
+		// Calculate lookup blocks.
+		// Block N contain the counts of each character up to, but not
+		// including, bwt[N * BLOCK_SIZE]
+		this.blocks = new int[sa.length / BLOCK_SIZE + 1][];
 		
 		int[] running = new int[this.alphabet.last() + 1];
 		for(int i = 0; i < bwt.length; i++) {
@@ -37,14 +39,10 @@ public class BackwardsSearchData {
 				this.blocks[i / BLOCK_SIZE] = Arrays.copyOf(running, running.length);
 			running[bwt[i]] += 1;
 		}
-		
-		this.blocks[this.blocks.length - 1] = running;
 	}
 	
 	public int rank(char c, int n) {
-		int rank = 0;
-		if(n >= BLOCK_SIZE)
-			rank = blocks[n / BLOCK_SIZE][c];
+		int rank = blocks[n / BLOCK_SIZE][c];
 		
 		for(int i = (n / BLOCK_SIZE) * BLOCK_SIZE; i < n; i++) {
 			if(bwt[i] == c)
