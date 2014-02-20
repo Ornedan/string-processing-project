@@ -3,6 +3,12 @@ package fi.helsinki.cs.u.aitakang;
 import java.util.Arrays;
 import java.util.TreeSet;
 
+/**
+ * The alphabet used in the text, the lesser-than character counts and a rank
+ * function - the extra pre-processed data needed for backwards search.
+ * 
+ * TODO: Rename
+ */
 public class BackwardsSearchData {
 
 	public static final int BLOCK_SIZE = 1024;
@@ -41,6 +47,10 @@ public class BackwardsSearchData {
 		}
 	}
 	
+	/**
+	 * The rank of a character at position N is the number of it's occurrences
+	 * in the BWT of the text before position N.
+	 */
 	public int rank(char c, int n) {
 		int rank = blocks[n / BLOCK_SIZE][c];
 		
@@ -53,8 +63,10 @@ public class BackwardsSearchData {
 	}
 	
 	
-	
-	public static char[] burrowsWheelerTransform(String text, int[] sa) {
+	/**
+	 * Generate the BWT of the text using the suffix array.
+	 */
+	protected char[] burrowsWheelerTransform(String text, int[] sa) {
 		char[] bwt = new char[sa.length];
 		for(int i = 0; i < sa.length; i++)
 			bwt[i] = sa[i] == 0 ? Searches.EOT : text.charAt(sa[i] - 1);
@@ -62,7 +74,12 @@ public class BackwardsSearchData {
 		return bwt;
 	}
 	
-	public static int[] lesserThanCounts(String text, int[] sa,
+	/**
+	 * Build the lesser-character-than counts for each character in the range
+	 * [\0, max(alphabet)]. That is, for each character, the number of other
+	 * in the text lesser than that character.
+	 */
+	protected static int[] lesserThanCounts(String text, int[] sa,
 			TreeSet<Character> alphabet) {
 		int[] counts = new int[alphabet.last() + 1];
 		for(int i = 0, n = 0; n < counts.length; n++) {

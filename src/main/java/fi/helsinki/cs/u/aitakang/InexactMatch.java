@@ -1,5 +1,9 @@
 package fi.helsinki.cs.u.aitakang;
 
+/**
+ * The result of an inexact match, a match augmented with the edit operations
+ * needed to transform the pattern to the inexactly matched string.
+ */
 public class InexactMatch extends Match {
 	
 	/** String specifying edit operations leading to this match. */

@@ -3,6 +3,14 @@ package fi.helsinki.cs.u.aitakang;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The suffix array-based search algorithms. Here are implemented:
+ * 
+ *  - exact binary search
+ *  - exact backwards search
+ *  - inexact binary search
+ *  - inexact backwards search
+ */
 public class Searches {
 
 	public static final char EOT = '\u0003';

@@ -8,6 +8,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * An interval tree is a data structure over intervals that allows for efficient
+ * search of intervals containing a point or intervals overlapping with another.
+ * 
+ * The approach used here is a binary tree where each node contains:
+ * 
+ *  - a center point
+ *  - all ranges containing that center point
+ *  -- listed in ascending order by their start point
+ *  -- listed in descending order by their end point
+ *  - left subtree constructed over all ranges completely to the left of the
+ *    center point
+ *  - right subtree constructed over all ranges completely to the right of the
+ *    center point
+ * 
+ * In addition to the interval nodes tree, there is a separate binary tree
+ * (flattened into an array) where the keys are the interval endpoints and
+ * values the intervals.
+ */
 public class IntervalTree<T extends Range> {
 	
 	/** Root of the interval nodes tree. */

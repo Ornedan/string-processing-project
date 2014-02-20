@@ -4,10 +4,10 @@ package fi.helsinki.cs.u.aitakang;
  * [begin, end), begin < end.
  */
 public class Range {
-	// Index of the first element in the range, inclusive
+	/** Index of the first element in the range, inclusive. */
 	public final int begin;
 	
-	// Index of the last element in the range, exclusive
+	/** Index of the last element in the range, exclusive. */
 	public final int end;
 
 	public Range(int begin, int end) {
