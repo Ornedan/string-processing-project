@@ -1,0 +1,24 @@
+[
+  {
+    "query": "the",
+    "type": "binary",
+    "isInexact": false
+  },
+  {
+    "query": "the",
+    "type": "backwards",
+    "isInexact": false
+  },
+  {
+    "query": "the",
+    "type": "binary",
+    "isInexact": true,
+    "threshold": 1
+  },
+  {
+    "query": "the",
+    "type": "backwards",
+    "isInexact": true,
+    "threshold": 1
+  }
+]
