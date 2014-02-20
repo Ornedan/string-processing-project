@@ -139,7 +139,7 @@ public class IntervalTreeTest {
 				assertThat(i + " should have one element", found.size(), is(1));
 				
 				// And that element should have ID equal to i / 2
-				assertThat(found.get(0).meta, is(i / 2)); 
+				assertThat(found.get(0).value, is(i / 2)); 
 				break;
 			// Odd positions should be empty
 			case 1:
@@ -168,7 +168,7 @@ public class IntervalTreeTest {
 				assertThat(i + " should have one element", found.size(), is(1));
 				
 				// And that element should have ID equal to i / 3
-				assertThat(found.get(0).meta, is(i / 3)); 
+				assertThat(found.get(0).value, is(i / 3)); 
 				break;
 			// 2 positions should be empty
 			case 2:
