@@ -31,11 +31,16 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
         <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
           <archive>
             <manifest>
               <mainClass>fi.helsinki.cs.u.aitakang.Main</mainClass>
+              <packageName>fi.helsinki.cs.u.aitakang</packageName>
             </manifest>
           </archive>
         </configuration>

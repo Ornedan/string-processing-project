@@ -112,13 +112,13 @@ Classes:
 
 First, compile the jar
 
-     mvn package
+     mvn assembly:assembly
 
 You can then run the testing main program:
 
-    java -jar target/string-processing-project-0.0.1-SNAPSHOT.jar <text> <metadata> <queries>
+    java -jar target/string-processing-project-0.0.1-SNAPSHOT-jar-with-dependencies.jar <text> <metadata> <queries>
 
 For example:
 
-    java -jar target/string-processing-project-0.0.1-SNAPSHOT.jar samples/short samples/short.meta samples/queries.json
+    java -jar target/string-processing-project-0.0.1-SNAPSHOT-jar-with-dependencies.jar samples/short samples/short.meta samples/queries.json
 
