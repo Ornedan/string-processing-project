@@ -17,10 +17,10 @@ import com.google.gson.reflect.TypeToken;
 public class Main {
 	
 	/** Number of times a query is repeated before starting the timing. */
-	private static final int PREPARATION_REPEATS = 2000;
+	private static final int PREPARATION_REPEATS = 1;
 	
 	/** Number of times a query is executed during a timing test. */
-	private static final int QUERY_REPEATS = 10000;
+	private static final int QUERY_REPEATS = 10;
 
 	
 	public static void main(String[] args) throws Throwable {
@@ -35,9 +35,8 @@ public class Main {
 				StandardCharsets.UTF_8) + Searches.EOT;
 		
 		// Construct the suffix array and other data structures
-		int[] sa = new int[text.length()];
-		sais.suffixsort(text, sa, text.length());
-		BackwardsSearchData bsd = new BackwardsSearchData(text, sa);
+		int[] sa = makeSuffixArray(text);
+		BackwardsSearchData bsd = makeBSD(text, sa);
 		
 		// Load the metadata spec
 		Type metaListType =
@@ -60,6 +59,41 @@ public class Main {
 			testQuery(text, sa, bsd, metaTree, query);
 	}
 	
+
+	private static int[] makeSuffixArray(String text) {
+		System.out.println("Suffix array construction started.");
+		
+		// Encourage garbage collection before timing an operation
+		System.gc();
+		
+		long start = System.currentTimeMillis();
+		
+		int[] sa = new int[text.length()];
+		sais.suffixsort(text, sa, text.length());
+		
+		long stop = System.currentTimeMillis();
+		
+		System.out.printf("Suffix array construction done, took %dms\n", stop - start);
+		
+		return sa;
+	}
+	
+	private static BackwardsSearchData makeBSD(String text, int[] sa) {
+		System.out.println("Auxiliary preprocessed data construction started.");
+		
+		// Encourage garbage collection before timing an operation
+		System.gc();
+		
+		long start = System.currentTimeMillis();
+		
+		BackwardsSearchData bsd = new BackwardsSearchData(text, sa);
+		
+		long stop = System.currentTimeMillis();
+		
+		System.out.printf("Auxiliary preprocessed data construction done, took %dms\n", stop - start);
+		
+		return bsd;
+	}
 	
 	private static IntervalTree<Metadata<Integer>> makeMetaTree(
 			List<Metadata<Integer>> metas) {
@@ -89,25 +123,42 @@ public class Main {
 		
 		// Run a few thousand repetitions first to hopefully get JIT done
 		for(int i = 0; i < PREPARATION_REPEATS; i++)
-			runQuery(text, sa, bsd, metaTree, query);
+			searchMetadata(sa, metaTree, searchText(text, sa, bsd, metaTree, query));
 		
 		// Encourage GC so it will interfere with the actual test less
 		System.gc();
 		
-		// Timing test
+		// Timing test - text search
+		List<? extends Match> textMatches = null;
 		long start = System.currentTimeMillis();
 		
 		for(int i = 0; i < QUERY_REPEATS; i++)
-			runQuery(text, sa, bsd, metaTree, query);
+			textMatches = searchText(text, sa, bsd, metaTree, query);
 		
 		long stop = System.currentTimeMillis();
 		
 		long time = stop - start;
-		System.out.printf("Query testing complete %.2fms per query, %d total\n",
-				time * 1.0 / QUERY_REPEATS, time);
+		System.out.printf("Text search testing complete %.2fms per query, %dms total, %d matches.\n",
+				time * 1.0 / QUERY_REPEATS, time, countMatches(textMatches));
 		
-		// Do one last query and show the results
-		List<QueryResult> results = runQuery(text, sa, bsd, metaTree, query);
+		// Timing test - metadata search
+		System.gc();
+		
+		List<QueryResult> results = null;
+		start = System.currentTimeMillis();
+		
+		for(int i = 0; i < QUERY_REPEATS; i++)
+			results = searchMetadata(sa, metaTree, textMatches);
+		
+		stop = System.currentTimeMillis();
+		
+		time = stop - start;
+		System.out.printf("Metadata search testing complete %.2fms per query, %dms total.\n",
+				time * 1.0 / (QUERY_REPEATS * results.size()), time);
+		
+		
+		// Show the results
+		/*
 		System.out.println("Matches: ");
 		for(QueryResult result: results) {
 			for(int i = result.match.begin; i < result.match.end; i++) {
@@ -117,14 +168,23 @@ public class Main {
 			System.out.println(result.metas);
 			System.out.println();
 		}
+		*/
 	}
 	
 	
+	private static int countMatches(List<? extends Match> matches) {
+		int count = 0;
+		for(Match match: matches)
+			count += match.end - match.begin;
+		return count;
+	}
+
+
 	/**
 	 * Call the appropriate Searches method for the given query.
 	 * @return 
 	 */
-	private static List<QueryResult> runQuery(String text, int[] sa,
+	private static List<? extends Match> searchText(String text, int[] sa,
 			BackwardsSearchData bsd, IntervalTree<Metadata<Integer>> metaTree,
 			QuerySpec query) {
 		List<? extends Match> matches = null;
@@ -148,18 +208,25 @@ public class Main {
 			break;
 		}
 		
+		return matches;
+	}
+	
+	private static List<QueryResult> searchMetadata(int[] sa,
+			IntervalTree<Metadata<Integer>> metaTree,
+			List<? extends Match> matches) {
 		// Find metadatas for each of the actual text hits
 		List<QueryResult> results = new ArrayList<>(matches.size());
-		for(Match match: matches) {
+		for (Match match : matches) {
 			List<Metadata<Integer>> metas = new ArrayList<>();
-			
-			for(int i = match.begin; i < match.end; i++) {
-				metas.addAll(metaTree.find(new Range(sa[i], sa[i] + match.length)));
+
+			for (int i = match.begin; i < match.end; i++) {
+				metas.addAll(metaTree.find(new Range(sa[i], sa[i]
+						+ match.length)));
 			}
-			
+
 			results.add(new QueryResult(match, metas));
-		}	
-		
+		}
+
 		return results;
 	}
 	
