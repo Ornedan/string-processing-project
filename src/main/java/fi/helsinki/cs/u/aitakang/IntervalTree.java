@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * An interval tree is a data structure over intervals that allows for efficient
@@ -37,6 +39,13 @@ public class IntervalTree<T extends Range> {
 	
 	
 	public IntervalTree(List<T> metas) {
+		Collections.sort(metas, new Comparator<Range>() {
+			@Override
+			public int compare(Range o1, Range o2) {
+				return o1.begin - o2.begin;
+			}
+		});
+		
 		this.root = mkNode(metas);
 		this.endpoints = mkEndpoints(metas);
 	}
@@ -50,7 +59,7 @@ public class IntervalTree<T extends Range> {
 			return null;
 		
 		// Select a point, hopefully one that generates a balanced tree
-		int center = (minBegin(elems) + maxEnd(elems)) / 2;
+		int center = (elems.get(elems.size() / 2).begin + elems.get(elems.size() / 2).begin) / 2;
 		
 		List<T> toLeft = new ArrayList<>();
 		List<T> toRight = new ArrayList<>();
@@ -97,6 +106,32 @@ public class IntervalTree<T extends Range> {
 		});
 		
 		return endpoints.toArray(new Endpoint[0]);
+	}
+	
+	public void analyse() {
+		System.out.printf("Interval tree of %d intervals.\n", endpoints.length / 2);
+		ArrayList<Integer> nodeDepths = new ArrayList<>();
+		analyse(nodeDepths, root, 1);
+		
+		TreeMap<Integer, Integer> depthCounts = new TreeMap<>();
+		for(Integer depth: nodeDepths) {
+			Integer old = depthCounts.get(depth);
+			if(old == null)
+				depthCounts.put(depth, 1);
+			else
+				depthCounts.put(depth, old + 1);
+		}
+		System.out.printf("  %d nodes, of depths: %s", nodeDepths.size(), depthCounts);
+	}
+	
+	private void analyse(ArrayList<Integer> nodeDepths, Node node, int depth) {
+		if(node == null)
+			return;
+		
+		nodeDepths.add(depth);
+		
+		analyse(nodeDepths, node.left, depth + 1);
+		analyse(nodeDepths, node.right, depth + 1);
 	}
 	
 	/**
