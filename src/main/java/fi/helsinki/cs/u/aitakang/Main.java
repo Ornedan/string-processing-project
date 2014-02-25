@@ -17,10 +17,10 @@ import com.google.gson.reflect.TypeToken;
 public class Main {
 	
 	/** Number of times a query is repeated before starting the timing. */
-	private static final int PREPARATION_REPEATS = 1;
+	private static final int PREPARATION_REPEATS = 2000;
 	
 	/** Number of times a query is executed during a timing test. */
-	private static final int QUERY_REPEATS = 10;
+	private static final int QUERY_REPEATS = 10000;
 
 	
 	public static void main(String[] args) throws Throwable {

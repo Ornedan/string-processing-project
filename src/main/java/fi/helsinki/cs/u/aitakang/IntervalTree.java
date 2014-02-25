@@ -32,10 +32,8 @@ public class IntervalTree<T extends Range> {
 	/** Root of the interval nodes tree. */
 	protected final Node root;
 	
-	/** List of included interval endpoints, inclusive, sorted ascending. */
-	// Has to be a List type instead of an array because how Java generics
-	// work - arrays of Endpoint cannot be created.
-	protected final ArrayList<Endpoint> endpoints;
+	/** Included interval endpoints, inclusive, sorted ascending. */
+	protected final Endpoint[] endpoints;
 	
 	
 	public IntervalTree(List<T> metas) {
@@ -82,7 +80,7 @@ public class IntervalTree<T extends Range> {
 	/**
 	 * Gather the metadata endpoints into a sorted array.
 	 */
-	protected ArrayList<Endpoint> mkEndpoints(List<T> ranges) {
+	protected Endpoint[] mkEndpoints(List<T> ranges) {
 		ArrayList<Endpoint> endpoints = new ArrayList<>();
 		
 		for(T range: ranges) {
@@ -98,7 +96,7 @@ public class IntervalTree<T extends Range> {
 			}
 		});
 		
-		return endpoints;
+		return endpoints.toArray(new Endpoint[0]);
 	}
 	
 	/**
@@ -112,14 +110,14 @@ public class IntervalTree<T extends Range> {
 		// Binary search the first endpoint included in the range
 		int first = 0;
 		int lo = 0;
-		int hi = this.endpoints.size() - 1;
+		int hi = this.endpoints.length - 1;
 		
 		while(hi >= lo) {
 			int mid = (lo + hi) / 2;
-			Endpoint midpoint = this.endpoints.get(mid);
+			Endpoint midpoint = this.endpoints[mid];
 			
 			if(midpoint.point >= range.begin &&
-			   (mid == 0 || this.endpoints.get(mid - 1).point < range.begin)) {
+			   (mid == 0 || this.endpoints[mid - 1].point < range.begin)) {
 				first = mid;
 				break;
 			}
@@ -133,9 +131,9 @@ public class IntervalTree<T extends Range> {
 		// All intervals with an endpoint in the query interval are results
 		// Assuming there are any
 		if (lo <= hi) {
-			for (int i = first; i < this.endpoints.size(); i++) {
-				if (this.endpoints.get(i).point < range.end)
-					results.add(this.endpoints.get(i).range);
+			for (int i = first; i < this.endpoints.length; i++) {
+				if (this.endpoints[i].point < range.end)
+					results.add((T)this.endpoints[i].range);
 				else
 					break;
 			}
@@ -171,15 +169,16 @@ public class IntervalTree<T extends Range> {
 		// Special easy case, the point we're searching for is exactly the
 		// center point.
 		if(point == node.center) {
-			for(Range elem: node.elemsByBegin)
-				results.add((T)elem);
+			for(int i = 0; i < node.elemsByBegin.length; i++)
+				results.add((T)node.elemsByBegin[i]);
 		}
 		// The point is left of this node's center. Some of the intervals may
 		// contain it, if they begin farther to the left.
 		else if(point < node.center) {
-			for(Range elem: node.elemsByBegin) {
+			for(int i = 0; i < node.elemsByBegin.length; i++) {
+				T elem = (T)node.elemsByBegin[i];
 				if(elem.begin <= point) // Inclusive
-					results.add((T)elem);
+					results.add(elem);
 				else
 					break;
 			}
@@ -190,9 +189,10 @@ public class IntervalTree<T extends Range> {
 		// The point is right of this node's center. Some of the intervals may
 		// contain it, if they begin farther to the right.
 		else {
-			for(Range elem: node.elemsByEnd) {
-				if (elem.end > point) // Exclusive
-					results.add((T)elem);
+			for(int i = 0; i < node.elemsByEnd.length; i++) {
+				T elem = (T)node.elemsByEnd[i];
+				if(elem.end > point) // Exclusive
+					results.add(elem);
 				else
 					break;
 			}
@@ -276,25 +276,6 @@ public class IntervalTree<T extends Range> {
 			return "Node [center=" + center + ", left=" + left + ", right="
 					+ right + ", elemsByBegin=" + Arrays.toString(elemsByBegin)
 					+ ", elemsByEnd=" + Arrays.toString(elemsByEnd) + "]";
-		}
-	}
-	
-	/**
-	 * End-point data structure composed of one end of a range, inclusive, and
-	 * a pointer to the range structure.
-	 */
-	protected class Endpoint {
-		final int point;
-		final T range;
-		
-		public Endpoint(int point, T range) {
-			this.point = point;
-			this.range = range;
-		}
-
-		@Override
-		public String toString() {
-			return "Endpoint [point=" + point + ", range=" + range + "]";
 		}
 	}
 }
