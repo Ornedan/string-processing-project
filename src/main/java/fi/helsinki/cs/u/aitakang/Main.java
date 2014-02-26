@@ -17,10 +17,17 @@ import com.google.gson.reflect.TypeToken;
 public class Main {
 	
 	/** Number of times a query is repeated before starting the timing. */
-	private static final int PREPARATION_REPEATS = 2000;
+	private static final int TEXT_PREPARATION_REPEATS = 2000;
 	
 	/** Number of times a query is executed during a timing test. */
-	private static final int QUERY_REPEATS = 10000;
+	private static final int TEXT_QUERY_REPEATS = 10000;
+
+	
+	/** Number of times a query is repeated before starting the timing. */
+	private static final int META_PREPARATION_REPEATS = 100;
+	
+	/** Number of times a query is executed during a timing test. */
+	private static final int META_QUERY_REPEATS = 100;
 
 	
 	public static void main(String[] args) throws Throwable {
@@ -122,9 +129,10 @@ public class Main {
 		System.out.println("Testing query " + query);
 		
 		// Run a few thousand repetitions first to hopefully get JIT done
+		/*
 		for(int i = 0; i < PREPARATION_REPEATS; i++)
 			searchMetadata(sa, metaTree, searchText(text, sa, bsd, metaTree, query));
-		
+		*/
 		// Encourage GC so it will interfere with the actual test less
 		System.gc();
 		
@@ -132,14 +140,14 @@ public class Main {
 		List<? extends Match> textMatches = null;
 		long start = System.currentTimeMillis();
 		
-		for(int i = 0; i < QUERY_REPEATS; i++)
+		for(int i = 0; i < TEXT_QUERY_REPEATS; i++)
 			textMatches = searchText(text, sa, bsd, metaTree, query);
 		
 		long stop = System.currentTimeMillis();
 		
 		long time = stop - start;
 		System.out.printf("Text search testing complete %.2fms per query, %dms total, %d matches.\n",
-				time * 1.0 / QUERY_REPEATS, time, countMatches(textMatches));
+				time * 1.0 / TEXT_QUERY_REPEATS, time, countMatches(textMatches));
 		
 		// Timing test - metadata search
 		System.gc();
@@ -147,14 +155,14 @@ public class Main {
 		List<QueryResult> results = null;
 		start = System.currentTimeMillis();
 		
-		for(int i = 0; i < QUERY_REPEATS; i++)
+		for(int i = 0; i < META_QUERY_REPEATS; i++)
 			results = searchMetadata(sa, metaTree, textMatches);
 		
 		stop = System.currentTimeMillis();
 		
 		time = stop - start;
 		System.out.printf("Metadata search testing complete %.2fms per query, %dms total.\n",
-				time * 1.0 / (QUERY_REPEATS * results.size()), time);
+				time * 1.0 / (META_QUERY_REPEATS * results.size()), time);
 		
 		
 		// Show the results
@@ -217,14 +225,10 @@ public class Main {
 		// Find metadatas for each of the actual text hits
 		List<QueryResult> results = new ArrayList<>(matches.size());
 		for (Match match : matches) {
-			List<Metadata<Integer>> metas = new ArrayList<>();
-
 			for (int i = match.begin; i < match.end; i++) {
-				metas.addAll(metaTree.find(new Range(sa[i], sa[i]
-						+ match.length)));
+				results.add(new QueryResult(match, metaTree.find(new Range(
+						sa[i], sa[i] + match.length))));
 			}
-
-			results.add(new QueryResult(match, metas));
 		}
 
 		return results;
