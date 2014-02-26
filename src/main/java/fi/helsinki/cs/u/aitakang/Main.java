@@ -16,24 +16,14 @@ import com.google.gson.reflect.TypeToken;
 
 public class Main {
 	
-	/** Number of times a query is repeated before starting the timing. */
-	private static final int TEXT_PREPARATION_REPEATS = 2000;
-	
-	/** Number of times a query is executed during a timing test. */
-	private static final int TEXT_QUERY_REPEATS = 10000;
-
-	
-	/** Number of times a query is repeated before starting the timing. */
-	private static final int META_PREPARATION_REPEATS = 100;
-	
-	/** Number of times a query is executed during a timing test. */
-	private static final int META_QUERY_REPEATS = 100;
-
 	
 	public static void main(String[] args) throws Throwable {
 		String pathToText = args[0];
 		String pathToMetas = args[1];
 		String pathToQueries = args[2];
+		String textRepeat = args[3];
+		String metaRepeat = args[4];
+		
 		
 		// Load the sample file into a string
 		String text = 
@@ -63,7 +53,8 @@ public class Main {
 		
 		// Run the queries on the data, reporting results
 		for(QuerySpec query: queries)
-			testQuery(text, sa, bsd, metaTree, query);
+			testQuery(text, sa, bsd, metaTree, query,
+					Integer.parseInt(textRepeat), Integer.parseInt(metaRepeat));
 	}
 	
 
@@ -123,9 +114,12 @@ public class Main {
 
 	/**
 	 * Run timing test on the given query.
+	 * @param k 
+	 * @param textRepeat 
 	 */
-	private static void testQuery(String text, int[] sa, BackwardsSearchData bsd,
-			IntervalTree<Metadata<Integer>> metaTree, QuerySpec query) {
+	private static void testQuery(String text, int[] sa,
+			BackwardsSearchData bsd, IntervalTree<Metadata<Integer>> metaTree,
+			QuerySpec query, final int textRepeat, final int metaRepeat) {
 		System.out.println("Testing query " + query);
 		
 		// Run a few thousand repetitions first to hopefully get JIT done
@@ -140,14 +134,14 @@ public class Main {
 		List<? extends Match> textMatches = null;
 		long start = System.currentTimeMillis();
 		
-		for(int i = 0; i < TEXT_QUERY_REPEATS; i++)
+		for(int i = 0; i < textRepeat; i++)
 			textMatches = searchText(text, sa, bsd, metaTree, query);
 		
 		long stop = System.currentTimeMillis();
 		
 		long time = stop - start;
 		System.out.printf("Text search testing complete %.2fms per query, %dms total, %d matches.\n",
-				time * 1.0 / TEXT_QUERY_REPEATS, time, countMatches(textMatches));
+				time * 1.0 / textRepeat, time, countMatches(textMatches));
 		
 		// Timing test - metadata search
 		System.gc();
@@ -155,14 +149,14 @@ public class Main {
 		List<QueryResult> results = null;
 		start = System.currentTimeMillis();
 		
-		for(int i = 0; i < META_QUERY_REPEATS; i++)
+		for(int i = 0; i < metaRepeat; i++)
 			results = searchMetadata(sa, metaTree, textMatches);
 		
 		stop = System.currentTimeMillis();
 		
 		time = stop - start;
 		System.out.printf("Metadata search testing complete %.2fms per query, %dms total.\n",
-				time * 1.0 / (META_QUERY_REPEATS * results.size()), time);
+				time * 1.0 / (metaRepeat * results.size()), time);
 		
 		
 		// Show the results
