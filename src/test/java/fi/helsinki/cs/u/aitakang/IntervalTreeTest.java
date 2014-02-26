@@ -95,7 +95,7 @@ public class IntervalTreeTest {
 		// Just check that it constructs at all
 		List<Range> empty = Collections.emptyList();
 		new IntervalTree<Range>(empty);
-		new IntervalTree<Range>(Collections.singletonList(new Range(0, 1)));
+		new IntervalTree<Range>(new ArrayList<>(Collections.singletonList(new Range(0, 1))));
 	}
 	
 	@Test
